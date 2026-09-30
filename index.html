@@ -8,7 +8,7 @@
   :root{
     --ink:#10221f; --paper:#f6f4ee; --paper-2:#ece8dd; --line:#d4cdbd;
     --teal:#1f6b5c; --teal-d:#134237; --amber:#c2762a; --amber-bg:#f7ead6;
-    --gris:#6e6a5f; --ok:#2c7a5b; --excl:#a64a3f;
+    --gris:#6e6a5f; --muted:#6e6a5f; --navy:#1E3A5F; --ok:#2c7a5b; --excl:#a64a3f;
     --shadow:0 1px 0 rgba(0,0,0,.04), 0 8px 24px -16px rgba(16,34,31,.4);
   }
   *{box-sizing:border-box}
@@ -16,7 +16,7 @@
   body{background:var(--paper);color:var(--ink);
     font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     -webkit-font-smoothing:antialiased;line-height:1.5;}
-  .wrap{max-width:1080px;margin:0 auto;padding:28px 22px 80px}
+  .wrap{max-width:1440px;margin:0 auto;padding:28px clamp(22px,4vw,64px) 80px}
   /* tabs */
   .tabs{display:flex;gap:4px;border-bottom:2px solid var(--ink);margin-bottom:24px;flex-wrap:wrap}
   .tab{appearance:none;border:1px solid var(--line);border-bottom:none;background:var(--paper-2);
@@ -210,6 +210,28 @@
     max-width:320px;overflow:hidden;text-overflow:ellipsis}
   tr:nth-child(even) td{background:#faf8f2}
   td.num{text-align:right;font-variant-numeric:tabular-nums;max-width:none;overflow:visible}
+  /* Alineación general: cada dato cae exactamente bajo su encabezado */
+  th.num{text-align:right}
+  th.ctr,td.ctr{text-align:center}
+  td.ctr{font-variant-numeric:tabular-nums}
+  .tbl-card{border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff}
+  .tbl-card table{min-width:0}
+  .tbl-card th,.tbl-card td{padding:10px 16px}
+  .tbl-card tr:last-child td{border-bottom:none}
+  .tbl-card tr.row-total td{background:var(--paper-2);font-weight:700;border-top:1px solid var(--line)}
+  .tbl-card tr.row-warn td{background:#fdf6ec}
+  .tbl-card tbody tr:hover td{background:#f1ede2}
+  /* Solapa secundaria (Datos): en línea con las principales, con menos peso */
+  .tab.tab-aux{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;
+    border-color:transparent;color:var(--teal-d);letter-spacing:.06em}
+  .tab.tab-aux:hover{background:var(--paper-2)}
+  .tab.tab-aux.on{background:var(--teal-d);border-color:var(--teal-d);color:#fff}
+  .nomref{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;
+    box-shadow:0 10px 30px -16px rgba(16,34,31,.4);font-size:13.5px}
+  .nomref h4{margin:0 0 8px;font-size:15px}
+  .nomref ul{margin:8px 0;padding-left:20px}.nomref li{margin:5px 0}
+  .nomref code{font-family:"DejaVu Sans Mono",monospace;font-size:12px;background:var(--paper-2);padding:1px 5px;border-radius:4px}
+  .nomref .muted{color:var(--gris)}
   .tbl-foot{font-size:11.5px;color:var(--gris);margin-top:10px}
   .pager{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;vertical-align:middle}
   .pager input::-webkit-outer-spin-button,.pager input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -310,15 +332,13 @@
         Menú <span id="exp-caret" style="font-size:9px;opacity:.7">▾</span>
       </button>
       <div id="exp-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:40;flex-direction:column;gap:6px;align-items:stretch;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 14px 38px -14px rgba(16,34,31,.5);min-width:270px">
-        <div class="menu-section">Prefacturación · OP / OME</div>
-        <button id="menu-data" class="menu-action" type="button"><span aria-hidden="true">◫</span> Datos de respaldo</button>
+        <div class="menu-section">Informes</div>
         <button id="exp-screen" class="menu-action" type="button"><span aria-hidden="true">▢</span> Informe de esta vista</button>
         <button id="exp-full" class="menu-action" type="button"><span aria-hidden="true">⬡</span> Informe integral</button>
         <button id="exp-multi" class="menu-action primary" type="button"><span aria-hidden="true">▦</span> Multiperíodo · todos los períodos</button>
         <div class="menu-separator"></div>
         <div class="menu-section">Nomenclador</div>
         <button id="menu-nov" class="menu-action" type="button"><span aria-hidden="true">●</span> Novedades</button>
-        <button id="menu-ref" class="menu-action" type="button"><span aria-hidden="true">ⓘ</span> Referencias</button>
       </div>
     </div>
     </div>
@@ -329,6 +349,7 @@
     <button class="tab" data-t="ome">OME · Ambulatorio</button>
     <button class="tab" data-t="recuperadas">OP Recuperadas</button>
     <button class="tab" data-t="nomenclador">Nomenclador PAMI</button>
+    <button class="tab tab-aux" data-t="data" title="Datos de respaldo: bases de prefacturación y referencias del nomenclador"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Datos</button>
   </div>
 
   <!-- ============ TAB OP ============ -->
@@ -493,6 +514,22 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         Glosario
       </button>
+      <button class="btn ghost" id="data-nomref" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Nomenclador
+      </button>
+    </div>
+    <div id="nomref-panel" class="nomref" style="display:none">
+      <h4>Base del nomenclador PAMI</h4>
+      <p class="muted" style="margin:0">El mapeo se hace por encabezado normalizado: no importa el orden, los acentos ni diferencias menores de espacios.</p>
+      <ul>
+        <li><strong>Base general:</strong> <code>Tipo</code> (opcional), <code>Código</code>/<code>Número</code>, <code>Nombre</code>/<code>Descripción</code>, <code>Valor</code> y <code>Período</code>. También reconoce <code>Código de práctica</code>, <code>Descripción de práctica</code>, <code>Módulo</code>, <code>Categoría</code>, <code>Vigencia</code> y <code>Nivel autorización - AC</code>.</li>
+        <li><strong>Medicamentos:</strong> <code>Código de práctica</code>, <code>Descripción de práctica</code> y <code>Valor resultante unidades</code> (o equivalentes).</li>
+        <li><strong>Subvalores:</strong> <code>Código padre</code>/<code>Práctica padre</code> más <code>Código subvalor</code>, <code>Nombre subvalor</code> y <code>Valor subvalor</code>. Las prácticas quedan anidadas dentro de su módulo.</li>
+        <li><strong>Alta complejidad:</strong> <code>Documentación mínima obligatoria</code> para previa y <code>Documentación para validar</code> para posterior.</li>
+      </ul>
+      <p style="margin:8px 0 14px"><strong>Histórico:</strong> cada sábana se agrega debajo de la anterior con <code>PERÍODO</code> en todas las filas. Se toma el más reciente como vigente.</p>
+      <button class="btn ghost" id="nomref-dl" type="button">Descargar nomenclador completo (CSV)</button>
     </div>
     <div id="gloss-panel" style="display:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 10px 30px -16px rgba(16,34,31,.4)"></div>
     <div id="data-status" class="secnote" style="margin:4px 0 14px"></div>
@@ -584,7 +621,7 @@
     var host=document.getElementById('nomenclador-host');
     try{
       var raiz=host.attachShadow({mode:'open'});
-      raiz.innerHTML='<style>'+decodificarUtf8Base64('__NOMEN_CSS_B64__')+'</style>'+decodificarUtf8Base64('__NOMEN_BODY_B64__');
+      raiz.innerHTML='<style>'+decodificarUtf8Base64('__NOMEN_CSS_B64__')+'#refBtn{display:none!important}</style>'+decodificarUtf8Base64('__NOMEN_BODY_B64__');
       var cuerpo=raiz.querySelector('.nomen-app');
       var docNomen=new Proxy(document,{get:function(obj,prop){
         if(prop==='querySelector')return raiz.querySelector.bind(raiz);
@@ -621,16 +658,6 @@
 
   /* Herramientas del menú general. Datos pertenece a Prefacturación; las
      otras dos acciones abren el componente nativo del Nomenclador. */
-  document.getElementById('menu-data').addEventListener('click',function(){
-    expClose();
-    document.querySelectorAll('#tabs .tab').forEach(function(x){x.classList.remove('on');});
-    document.querySelectorAll('.panel-tab').forEach(function(x){x.classList.remove('on');});
-    document.getElementById('tab-data').classList.add('on');
-    document.getElementById('export-bar').style.display='flex';
-    document.getElementById('reglas-bar').style.display='flex';
-    var pie=document.querySelector('.foot');if(pie)pie.style.display='';
-  });
-
   function abrirHerramientaNomenclador(idBoton){
     expClose();
     var solapa=document.querySelector('#tabs .tab[data-t="nomenclador"]');
@@ -642,7 +669,16 @@
     });
   }
   document.getElementById('menu-nov').addEventListener('click',function(){abrirHerramientaNomenclador('novBtn');});
-  document.getElementById('menu-ref').addEventListener('click',function(){abrirHerramientaNomenclador('refBtn');});
+  /* Referencias del nomenclador, dentro de Datos */
+  document.getElementById('data-nomref').addEventListener('click',function(){
+    var p=document.getElementById('nomref-panel'); p.style.display=(p.style.display==='none')?'block':'none';
+  });
+  document.getElementById('nomref-dl').addEventListener('click',function(){
+    iniciarNomenclador();
+    var host=document.getElementById('nomenclador-host');
+    var b=host&&host.shadowRoot&&host.shadowRoot.getElementById('dlBaseBtn');
+    if(b)b.click();
+  });
 
   /* ================= OP ================= */
   var opEje='fliq', opPer=null;
@@ -992,7 +1028,7 @@
     function gateTh(){ return '<th class="col-gate"><button class="gate-btn'+(dExpanded?' open':'')+'" data-gate="1" title="'+(dExpanded?'Ocultar columnas auxiliares':'Mostrar columnas auxiliares (se activa scroll lateral)')+'">'+(dExpanded?'‹':'+')+'</button></th>'; }
     function gateTd(){ return '<td class="col-gate"></td>'; }
 
-    var ths='<tr><th style="width:1px"><span class="th-lbl" style="cursor:default">#</span></th>';
+    var ths='<tr><th class="col-num" style="width:1px"><span class="th-lbl" style="cursor:default">#</span></th>';
     vis.forEach(function(i){
       if(gates[i]==='before') ths+=gateTh();
       var c=dCols[i];
@@ -1952,15 +1988,15 @@
     var host=document.getElementById('rec-tabla');
     if(!host) return;
     if(!data.length){ host.innerHTML=''; return; }
-    var h='<table style="min-width:0"><thead><tr><th>Mes</th><th class="num">Recibidas</th><th class="num">Recuperadas</th><th class="num">No sub.</th><th class="num">% recupero</th></tr></thead><tbody>';
+    var h='<div class="tbl-card"><table><thead><tr><th>Mes</th><th class="ctr">Recibidas</th><th class="ctr">Recuperadas</th><th class="ctr">No sub.</th><th class="ctr">% recupero</th></tr></thead><tbody>';
     data.forEach(function(d){
       var p= d.recibidas>0 ? (Math.round(d.recuperadas/d.recibidas*1000)/10) : 0;
       var col = p>=85?'#2c7a5b':(p>=75?'#c2762a':'#a64a3f');
       var mesCap=(d.mes||'').charAt(0).toUpperCase()+(d.mes||'').slice(1);
-      h+='<tr><td>'+mesCap+' '+(d.anio||'')+'</td><td class="num">'+(d.recibidas||0)+'</td><td class="num" style="color:#2c7a5b;font-weight:600">'+(d.recuperadas||0)+'</td><td class="num">'+((d.recibidas||0)-(d.recuperadas||0))+'</td><td class="num" style="color:'+col+';font-weight:600">'+p.toFixed(1)+'%</td></tr>';
+      h+='<tr><td>'+mesCap+' '+(d.anio||'')+'</td><td class="ctr">'+(d.recibidas||0)+'</td><td class="ctr" style="color:#2c7a5b;font-weight:600">'+(d.recuperadas||0)+'</td><td class="ctr">'+((d.recibidas||0)-(d.recuperadas||0))+'</td><td class="ctr" style="color:'+col+';font-weight:600">'+p.toFixed(1)+'%</td></tr>';
     });
-    h+='<tr style="background:#d9e1f2;font-weight:700"><td>Total</td><td class="num">'+totRecib+'</td><td class="num" style="color:#2c7a5b">'+totRecup+'</td><td class="num">'+(totRecib-totRecup)+'</td><td class="num">'+pct.toFixed(1)+'%</td></tr>';
-    h+='</tbody></table>';
+    h+='<tr class="row-total"><td>Total</td><td class="ctr">'+totRecib+'</td><td class="ctr" style="color:#2c7a5b">'+totRecup+'</td><td class="ctr">'+(totRecib-totRecup)+'</td><td class="ctr">'+pct.toFixed(1)+'%</td></tr>';
+    h+='</tbody></table></div>';
     host.innerHTML=h;
   }
 
@@ -1987,13 +2023,13 @@
     if(q){ filtrados=filtrados.filter(function(c){ return (c.nombre||'').toLowerCase().indexOf(q)>=0 || (c.op||'').toLowerCase().indexOf(q)>=0 || (c.dni||'').toLowerCase().indexOf(q)>=0; }); }
     filtrados.sort(function(a,b){ var mi=recMesIndex(a.mes)-recMesIndex(b.mes); if(mi!==0) return mi; return (recEsNoSub(b)?1:0)-(recEsNoSub(a)?1:0); });
     if(!filtrados.length){ host.innerHTML='<div style="color:#8a877f;font-size:13px;padding:8px 2px">No hay casos para el filtro seleccionado.</div>'; return; }
-    var h='<div style="overflow-x:auto"><table style="min-width:640px"><thead><tr><th>Mes</th><th>Nombre</th><th>OP</th><th>DNI</th><th>Ingreso</th><th>Egreso</th><th>Estado</th><th>Motivo / Obs.</th></tr></thead><tbody>';
+    var h='<div class="tbl-card"><table style="min-width:640px"><thead><tr><th>Mes</th><th>Nombre</th><th class="ctr">OP</th><th class="ctr">DNI</th><th class="ctr">Ingreso</th><th class="ctr">Egreso</th><th class="ctr">Estado</th><th>Motivo / Obs.</th></tr></thead><tbody>';
     filtrados.forEach(function(c){
       var no=recEsNoSub(c);
       var mesCap=(c.mes||'').charAt(0).toUpperCase()+(c.mes||'').slice(1);
       var badge=no?'<span style="display:inline-block;padding:2px 8px;border-radius:12px;background:#f7ead6;color:#a64a3f;font-weight:600;font-size:11px">NO SUB.</span>':'<span style="display:inline-block;padding:2px 8px;border-radius:12px;background:#e9f7f0;color:#2c7a5b;font-weight:600;font-size:11px">OK</span>';
       var motObs=[c.motivo,c.obs].filter(function(x){return x;}).join(' · ');
-      h+='<tr'+(no?' style="background:#fdf6ec"':'')+'><td>'+mesCap+'</td><td style="text-align:left">'+(c.nombre||'')+'</td><td>'+(c.op||'')+'</td><td>'+(c.dni||'')+'</td><td>'+(c.fi||'')+'</td><td>'+(c.fe||'')+'</td><td>'+badge+'</td><td style="text-align:left;font-size:11.5px;color:#6e6a5f">'+motObs+'</td></tr>';
+      h+='<tr'+(no?' class="row-warn"':'')+'><td>'+mesCap+'</td><td>'+(c.nombre||'')+'</td><td class="ctr">'+(c.op||'')+'</td><td class="ctr">'+(c.dni||'')+'</td><td class="ctr">'+(c.fi||'')+'</td><td class="ctr">'+(c.fe||'')+'</td><td class="ctr">'+badge+'</td><td style="text-align:left;font-size:11.5px;color:#6e6a5f">'+motObs+'</td></tr>';
     });
     h+='</tbody></table></div><div style="font-size:11.5px;color:#8a877f;margin-top:6px">'+filtrados.length+' caso'+(filtrados.length!==1?'s':'')+' en vista</div>';
     host.innerHTML=h;
